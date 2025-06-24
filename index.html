@@ -247,6 +247,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // NOTE: Chart.js and other libraries are loaded via CDN in the <head>
+
             const elegantPalette = {
                 primary: '#1d4ed8',   // blue-700
                 secondary: '#64748b', // slate-500
@@ -394,7 +396,7 @@
                 }, 5000); 
             }
 
-            // Gemini API Feature
+            // --- Gemini API Feature ---
             const modal = document.getElementById('analysis-modal');
             const modalCloseBtn = document.getElementById('modal-close-btn');
             const modalTitle = document.getElementById('modal-title');
@@ -409,44 +411,38 @@
                 modalBody.innerHTML = '<div class="flex justify-center"><span class="loader"></span></div>';
                 showModal();
 
-                const prompt = `Actúa como un consultor de estrategia económica de alto nivel. Para el sector '${sectorName}' dentro del marco del 'Plan México', genera un análisis conciso y ejecutivo. El análisis debe incluir los siguientes puntos, formateados claramente con títulos: 1. **Principales Oportunidades:** Enfócate en nearshoring, innovación y cadenas de valor. 2. **Riesgos Clave:** Identifica los principales desafíos internos y externos a mitigar. 3. **Acciones Estratégicas Sugeridas:** Propón 3 acciones concretas y de alto impacto para maximizar el potencial del sector. Usa un lenguaje claro, directo y profesional.`;
+                // The URL points to our own serverless function, not Google's API
+                const functionUrl = '/api/getAnalysis';
                 
                 try {
-                    const apiKey = ""; 
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-                    
-                    const payload = {
-                        contents: [{
-                            role: "user",
-                            parts: [{ text: prompt }]
-                        }]
-                    };
-
-                    const response = await fetch(apiUrl, {
+                    const response = await fetch(functionUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
+                        body: JSON.stringify({ sector: sectorName })
                     });
 
                     if (!response.ok) {
-                        throw new Error(`API request failed with status ${response.status}`);
+                        throw new Error(`Serverless function failed with status ${response.status}`);
                     }
-
+                    
+                    // The response from our function is the direct response from Gemini
                     const result = await response.json();
                     
                     if (result.candidates && result.candidates.length > 0) {
                         const text = result.candidates[0].content.parts[0].text;
+                        // Simple Markdown-like formatting
                         const formattedText = text
                             .replace(/\*\*(.*?)\*\*/g, '<h3>$1</h3>')
-                            .replace(/\*/g, '<li>')
-                            .replace(/\n/g, '<br>');
-                        modalBody.innerHTML = `<div class="analysis-content">${formattedText.replace(/<br><li>/g, '<li>').replace(/<li>/g, '<ul><li>').replace(/<\/h3>/g, '</h3></ul>')}</div>`;
+                            .replace(/^\* (.*$)/gm, '<li>$1</li>');
+                        
+                        modalBody.innerHTML = `<div class="analysis-content">${formattedText.replace(/<\/h3>\n?<li>/g, '</h3><ul><li>').replace(/(<\/li>)(?!<li>)/g, '$1</ul>')}</div>`;
+                        
                     } else {
-                        throw new Error("No content received from API.");
+                         throw new Error("No content received from API via serverless function.");
                     }
                 } catch (error) {
                     console.error("Error fetching analysis:", error);
-                    modalBody.innerHTML = `<p class="text-red-500">No se pudo generar el análisis. Por favor, intente de nuevo más tarde.</p>`;
+                    modalBody.innerHTML = `<p class="text-red-500">No se pudo generar el análisis. Por favor, revise la configuración y los registros de la función serverless.</p>`;
                 }
             }
 
