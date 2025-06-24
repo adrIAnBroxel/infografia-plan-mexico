@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografía: Plan México - Visión Estratégica 2030</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9; /* slate-100 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid #e2e8f0; /* slate-200 */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 1.5rem;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .kpi-card {
+            text-align: center;
+        }
+        .kpi-icon {
+            width: 4rem;
+            height: 4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+            margin: 0 auto 1rem;
+        }
+        .kpi-icon i {
+            width: 2rem;
+            height: 2rem;
+        }
+        .flow-arrow {
+            font-size: 2.5rem;
+            line-height: 1;
+            color: #2563eb; /* blue-600 */
+        }
+        .section-card {
+            border-top: 4px solid #0f172a; /* slate-900 */
+        }
+        .sector-content {
+             flex-grow: 1;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            max-width: 90%;
+            width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            transform: scale(0.95);
+            transition: transform 0.3s;
+        }
+        .modal-overlay.visible .modal-content {
+            transform: scale(1);
+        }
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #dbeafe;
+            border-bottom-color: #1d4ed8;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+        @keyframes rotation {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        .analysis-content h3 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #1d4ed8;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .analysis-content ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+        }
+        .analysis-content li {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <header class="relative min-h-[60vh] md:min-h-[70vh] flex items-center text-white mb-16 overflow-hidden">
+        <div id="banner-bg-1" class="absolute top-0 left-0 w-full h-full bg-cover bg-center transition-opacity duration-1000 ease-in-out opacity-100"></div>
+        <div id="banner-bg-2" class="absolute top-0 left-0 w-full h-full bg-cover bg-center transition-opacity duration-1000 ease-in-out opacity-0"></div>
+        <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-slate-900/80 to-slate-900/20"></div>
+        <div class="relative container mx-auto p-4 md:p-8">
+            <div class="max-w-xl text-left">
+                 <h1 class="text-4xl md:text-6xl font-black mb-2">Plan México</h1>
+                 <p class="text-xl md:text-2xl text-blue-300 font-semibold">Visión Estratégica para una Nueva Era Geopolítica</p>
+                 <p class="mt-4 text-base text-slate-200">Una política industrial activa y dirigida para consolidar a México como potencia económica, aprovechando el *nearshoring* y fortaleciendo la soberanía nacional.</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto p-4 md:p-8">
+        <section id="goals" class="mb-20">
+            <h2 class="text-3xl font-bold text-center text-slate-900 mb-10">Metas Macroeconómicas para 2030</h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                <div class="card kpi-card"><div class="kpi-icon bg-blue-100 text-blue-700"><i data-lucide="trending-up"></i></div><p class="font-bold text-lg mt-2">10ª Economía</p><p class="text-sm text-slate-500">Pasar del 12º al 10º lugar mundial.</p></div>
+                <div class="card kpi-card"><div class="kpi-icon bg-blue-100 text-blue-700"><i data-lucide="piggy-bank"></i></div><p class="font-bold text-lg mt-2">>28% Inversión/PIB</p><p class="text-sm text-slate-500">Superar el 28% de inversión para 2030.</p></div>
+                <div class="card kpi-card"><div class="kpi-icon bg-blue-100 text-blue-700"><i data-lucide="hard-hat"></i></div><p class="font-bold text-lg mt-2">1.5M Empleos</p><p class="text-sm text-slate-500">Nuevos empleos en manufactura especializada.</p></div>
+                <div class="card kpi-card"><div class="kpi-icon bg-blue-100 text-blue-700"><i data-lucide="package-check"></i></div><p class="font-bold text-lg mt-2">50% Contenido Nac.</p><p class="text-sm text-slate-500">En sectores clave como textil y calzado.</p></div>
+                <div class="card kpi-card"><div class="kpi-icon bg-blue-100 text-blue-700"><i data-lucide="landmark"></i></div><p class="font-bold text-lg mt-2">50% Compras Púb.</p><p class="text-sm text-slate-500">De producción nacional.</p></div>
+                <div class="card kpi-card"><div class="kpi-icon bg-blue-100 text-blue-700"><i data-lucide="syringe"></i></div><p class="font-bold text-lg mt-2">Vacunas Propias</p><p class="text-sm text-slate-500">Desarrollar capacidad de producción nacional.</p></div>
+                <div class="card kpi-card"><div class="kpi-icon bg-blue-100 text-blue-700"><i data-lucide="timer"></i></div><p class="font-bold text-lg mt-2">Inversión en 1 Año</p><p class="text-sm text-slate-500">Reducir tiempo de 2.6 años a 1 año.</p></div>
+                <div class="card kpi-card"><div class="kpi-icon bg-blue-100 text-blue-700"><i data-lucide="graduation-cap"></i></div><p class="font-bold text-lg mt-2">150k Profesionales</p><p class="text-sm text-slate-500">Formados anualmente en áreas estratégicas.</p></div>
+            </div>
+        </section>
+
+        <section id="investment" class="mb-20 card section-card">
+            <h2 class="text-3xl font-bold text-center text-slate-900 mb-2">La Oportunidad de Inversión</h2>
+            <p class="text-center max-w-3xl mx-auto mb-10 text-slate-600">El plan busca convertir un vasto interés de inversión en proyectos concretos, enfrentando un desafío de credibilidad frente a pronósticos externos.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <h3 class="text-2xl font-bold text-center mb-4 text-slate-700">Portafolio de Inversión Potencial</h3>
+                    <div class="chart-container h-[300px] md:h-[350px]"><canvas id="investmentPortfolioChart"></canvas></div>
+                    <p class="text-center text-sm mt-4 text-slate-500">Interés de inversión de <strong class="text-blue-700 text-lg">$277,000 MDD</strong> por sector. Esta cifra es un inventario, no capital comprometido.</p>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold text-center mb-4 text-slate-700">La "Brecha de Optimismo": Crecimiento 2025</h3>
+                    <div class="chart-container h-[300px] md:h-[350px]"><canvas id="optimismGapChart"></canvas></div>
+                     <p class="text-center text-sm mt-4 text-slate-500">Comparativa de proyecciones del PIB de México para 2025: Gobierno vs. organismos internacionales.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="sectors" class="mb-20">
+            <h2 class="text-3xl font-bold text-center text-slate-900 mb-10">Los Nueve Motores del Crecimiento</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <div class="card"><div class="sector-content"><h3 class="font-bold text-xl text-blue-700 mb-3">1. Agroindustria</h3><p class="text-sm mb-4 text-slate-600">Meta: Soberanía alimentaria. Incremento de 25M de toneladas de maíz y 15B de litros de leche.</p></div><div class="chart-container h-[250px]"><canvas id="agroChart"></canvas></div><button class="mt-4 w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 analysis-btn" data-sector="Agroindustria">✨ Analizar Oportunidades</button></div>
+                <div class="card"><div class="sector-content"><h3 class="font-bold text-xl text-blue-700 mb-3">2. Energía</h3><p class="text-sm mb-4 text-slate-600">Meta: Soberanía energética. CFE generará el 54% de la electricidad; 45% de la matriz será renovable en 2030.</p></div><div class="chart-container h-[250px]"><canvas id="energyChart"></canvas></div><button class="mt-4 w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 analysis-btn" data-sector="Energía y Transición Energética">✨ Analizar Oportunidades</button></div>
+                <div class="card"><div class="sector-content"><h3 class="font-bold text-xl text-blue-700 mb-3">3. Electromovilidad</h3><p class="text-sm mb-4 text-slate-600">Meta: Posicionar a México como hub de electromovilidad con el proyecto de vehículo eléctrico "Olinia".</p><div class="text-center py-12 flex-grow flex flex-col justify-center items-center"><div class="kpi-icon bg-blue-100 text-blue-700"><i data-lucide="car-front"></i></div><p class="font-bold text-2xl mt-4 text-slate-700">Proyecto "Olinia"</p><p class="text-sm text-slate-500">Prototipo 2026, producción en 2027.</p></div></div><button class="mt-4 w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 analysis-btn" data-sector="Electromovilidad y la Industria Automotriz">✨ Analizar Oportunidades</button></div>
+                <div class="card"><div class="sector-content"><h3 class="font-bold text-xl text-blue-700 mb-3">4. Semiconductores</h3><p class="text-sm mb-4 text-slate-600">Meta: Integrar a México en la cadena de alta tecnología (ATP), relocalizando $10,000 MDD.</p><div class="text-center py-12 flex-grow flex flex-col justify-center items-center"><div class="kpi-icon bg-blue-100 text-blue-700"><i data-lucide="cpu"></i></div><p class="font-bold text-2xl mt-4 text-slate-700">$10,000 MDD</p><p class="text-sm text-slate-500">En relocalización de operaciones ATP.</p></div></div><button class="mt-4 w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 analysis-btn" data-sector="Semiconductores y Tecnologías de la Información">✨ Analizar Oportunidades</button></div>
+                <div class="card"><div class="sector-content"><h3 class="font-bold text-xl text-blue-700 mb-3">5. Farmacéutica</h3><p class="text-sm mb-4 text-slate-600">Meta: Ser líder regional, atrayendo $2,000 MDD anuales en I+D y construyendo una planta de vacunas mRNA.</p><div class="text-center py-12 flex-grow flex flex-col justify-center items-center"><div class="kpi-icon bg-blue-100 text-blue-700"><i data-lucide="microscope"></i></div><p class="font-bold text-2xl mt-4 text-slate-700">$2,000 MDD / Año</p><p class="text-sm text-slate-500">En inversión para investigación clínica.</p></div></div><button class="mt-4 w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 analysis-btn" data-sector="Industria Farmacéutica y Dispositivos Médicos">✨ Analizar Oportunidades</button></div>
+                <div class="card"><div class="sector-content"><h3 class="font-bold text-xl text-blue-700 mb-3">6. Textil y Calzado</h3><p class="text-sm mb-4 text-slate-600">Meta: Recuperar 20,000 empleos y lograr 50% de consumo nacional, apoyado por aranceles.</p><div class="text-center py-12 flex-grow flex flex-col justify-center items-center"><div class="kpi-icon bg-blue-100 text-blue-700"><i data-lucide="shirt"></i></div><p class="font-bold text-2xl mt-4 text-slate-700">20,000 Empleos</p><p class="text-sm text-slate-500">Recuperación de empleos directos.</p></div></div><button class="mt-4 w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 analysis-btn" data-sector="Industria Textil y del Calzado">✨ Analizar Oportunidades</button></div>
+                <div class="card"><div class="sector-content"><h3 class="font-bold text-xl text-blue-700 mb-3">7. Petroquímica</h3><p class="text-sm mb-4 text-slate-600">Meta: Sustituir $14,000 MDD en importaciones con la reactivación del complejo "La Cangrejera".</p><div class="text-center py-12 flex-grow flex flex-col justify-center items-center"><div class="kpi-icon bg-blue-100 text-blue-700"><i data-lucide="flask-conical"></i></div><p class="font-bold text-2xl mt-4 text-slate-700">$14,000 MDD</p><p class="text-sm text-slate-500">En sustitución de importaciones.</p></div></div><button class="mt-4 w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 analysis-btn" data-sector="Petroquímica">✨ Analizar Oportunidades</button></div>
+                <div class="card"><div class="sector-content"><h3 class="font-bold text-xl text-blue-700 mb-3">8. Aeroespacial</h3><p class="text-sm mb-4 text-slate-600">Meta: Alcanzar manufactura de élite, logrando la integración de un motor de aeronave Safran.</p><div class="text-center py-12 flex-grow flex flex-col justify-center items-center"><div class="kpi-icon bg-blue-100 text-blue-700"><i data-lucide="plane"></i></div><p class="font-bold text-2xl mt-4 text-slate-700">Motor Completo</p><p class="text-sm text-slate-500">Integración de turbinas Safran en México.</p></div></div><button class="mt-4 w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 analysis-btn" data-sector="Industria Aeroespacial">✨ Analizar Oportunidades</button></div>
+                <div class="card"><div class="sector-content"><h3 class="font-bold text-xl text-blue-700 mb-3">9. Bienes de Consumo</h3><p class="text-sm mb-4 text-slate-600">Meta: Fortalecer el mercado interno con proveeduría de PYMEs y el programa "Hecho en México".</p><div class="text-center py-12 flex-grow flex flex-col justify-center items-center"><div class="kpi-icon bg-blue-100 text-blue-700"><i data-lucide="shopping-bag"></i></div><p class="font-bold text-2xl mt-4 text-slate-700">50% Hecho en México</p><p class="text-sm text-slate-500">En tiendas departamentales (Acuerdo ANTAD).</p></div></div><button class="mt-4 w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 analysis-btn" data-sector="Bienes de Consumo y Mercado Interno">✨ Analizar Oportunidades</button></div>
+            </div>
+        </section>
+
+        <section id="enablers" class="mb-16 card section-card">
+            <h2 class="text-3xl font-bold text-center text-slate-900 mb-2">Los Tres Habilitadores de la Transformación</h2>
+            <p class="text-center max-w-3xl mx-auto mb-10 text-slate-600">El éxito del plan no depende de sectores aislados, sino de un sistema integrado de tres pilares que se refuerzan mutuamente.</p>
+            <div class="flex flex-col md:flex-row items-center justify-around gap-8">
+                <div class="text-center max-w-xs">
+                    <div class="kpi-icon bg-blue-100 text-blue-700"><i data-lucide="factory"></i></div>
+                    <h3 class="font-bold text-lg text-slate-700">Polos de Bienestar</h3>
+                    <p class="text-sm text-slate-500">Infraestructura y terrenos con incentivos fiscales para atraer empresas "ancla".</p>
+                </div>
+                <div class="flow-arrow md:rotate-0 rotate-90">→</div>
+                <div class="text-center max-w-xs">
+                     <div class="kpi-icon bg-blue-100 text-blue-700"><i data-lucide="laptop"></i></div>
+                    <h3 class="font-bold text-lg text-slate-700">Ventanilla Digital</h3>
+                    <p class="text-sm text-slate-500">Plataforma única para reducir la burocracia y agilizar la inversión de 2.6 años a 1 año.</p>
+                </div>
+                 <div class="flow-arrow md:rotate-0 rotate-90">→</div>
+                 <div class="text-center max-w-xs">
+                    <div class="kpi-icon bg-blue-100 text-blue-700"><i data-lucide="coins"></i></div>
+                    <h3 class="font-bold text-lg text-slate-700">Capital y Talento</h3>
+                    <p class="text-sm text-slate-500">Financiamiento para PYMEs proveedoras y formación de capital humano especializado.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="bg-slate-900 text-white text-center p-4">
+        <p class="text-sm text-slate-300">Infografía basada en el Análisis Estratégico del Plan México. Datos con fines ilustrativos.</p>
+    </footer>
+
+    <!-- Modal for AI Analysis -->
+    <div id="analysis-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button id="modal-close-btn" class="absolute top-4 right-4 text-slate-500 hover:text-slate-800">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            <h2 id="modal-title" class="text-2xl font-bold text-slate-900 mb-4">Análisis Estratégico</h2>
+            <div id="modal-body" class="text-slate-600">
+                <!-- Loader or content goes here -->
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const elegantPalette = {
+                primary: '#1d4ed8',   // blue-700
+                secondary: '#64748b', // slate-500
+                accent: '#f97316',    // orange-500
+                light: '#dbeafe',     // blue-100
+                dark: '#1e293b',      // slate-800
+                textLight: '#64748b'   // slate-500
+            };
+
+            const tooltipTitleCallback = (tooltipItems) => {
+                const item = tooltipItems[0];
+                let label = item.chart.data.labels[item.dataIndex];
+                if (Array.isArray(label)) {
+                    return label.join(' ');
+                } else {
+                    return label;
+                }
+            };
+            
+            const defaultChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: elegantPalette.textLight,
+                            font: { size: 12 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: tooltipTitleCallback
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: elegantPalette.textLight },
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                    },
+                    x: {
+                        ticks: { color: elegantPalette.textLight },
+                        grid: { display: false }
+                    }
+                }
+            };
+
+            new Chart(document.getElementById('investmentPortfolioChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Automotriz', 'Energía', 'Agroindustria', 'Semiconductores', 'Otros'],
+                    datasets: [{
+                        label: 'Interés de Inversión (MDD)',
+                        data: [80000, 65000, 45000, 30000, 57000],
+                        backgroundColor: [elegantPalette.primary, elegantPalette.accent, '#22c55e', '#facc15', elegantPalette.secondary],
+                        borderColor: 'white',
+                        borderWidth: 4,
+                    }]
+                },
+                options: { ...defaultChartOptions, scales: { y: { display: false }, x: { display: false } } }
+            });
+
+            new Chart(document.getElementById('optimismGapChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Gobierno de México', 'Banco Mundial', 'FMI', 'OCDE', 'Banco de México'],
+                    datasets: [{
+                        label: 'Proyección Crecimiento PIB 2025 (%)',
+                        data: [2.5, 1.5, 1.3, 1.2, 1.2],
+                        backgroundColor: [elegantPalette.primary, elegantPalette.light, elegantPalette.light, elegantPalette.light, elegantPalette.light],
+                        borderRadius: 4
+                    }]
+                },
+                options: { ...defaultChartOptions, plugins: { ...defaultChartOptions.plugins, legend: { display: false } } }
+            });
+            
+            new Chart(document.getElementById('agroChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Maíz (M ton)', 'Leche (B L)'],
+                    datasets: [
+                        {
+                            label: 'Producción Actual (Estimada)',
+                            data: [22, 13],
+                            backgroundColor: elegantPalette.light,
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Meta 2030',
+                            data: [25, 15],
+                            backgroundColor: elegantPalette.primary,
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: defaultChartOptions
+            });
+
+            new Chart(document.getElementById('energyChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['Generación CFE (Meta 54%)', 'Generación Privada (46%)'],
+                    datasets: [{
+                        data: [54, 46],
+                        backgroundColor: [elegantPalette.primary, elegantPalette.light],
+                        borderColor: 'white',
+                        borderWidth: 4,
+                    }]
+                },
+                 options: { ...defaultChartOptions, scales: { y: { display: false }, x: { display: false } } }
+            });
+
+            lucide.createIcons();
+
+            const images = [
+                'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1470&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1567789884554-0b844b597180?q=80&w=1470&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1617863139591-ea8a00282119?q=80&w=1470&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1577233857248-22114a1a74e9?q=80&w=1470&auto=format&fit=crop'
+            ];
+            let currentImageIndex = 0;
+            const banner1 = document.getElementById('banner-bg-1');
+            const banner2 = document.getElementById('banner-bg-2');
+            let activeBanner = 1;
+
+            if(banner1 && banner2) {
+                banner1.style.backgroundImage = `url('${images[0]}')`;
+                setInterval(() => {
+                    currentImageIndex = (currentImageIndex + 1) % images.length;
+                    const nextImage = images[currentImageIndex];
+
+                    if (activeBanner === 1) {
+                        banner2.style.backgroundImage = `url('${nextImage}')`;
+                        banner1.style.opacity = '0';
+                        banner2.style.opacity = '1';
+                        activeBanner = 2;
+                    } else {
+                        banner1.style.backgroundImage = `url('${nextImage}')`;
+                        banner2.style.opacity = '0';
+                        banner1.style.opacity = '1';
+                        activeBanner = 1;
+                    }
+                }, 5000); 
+            }
+
+            // Gemini API Feature
+            const modal = document.getElementById('analysis-modal');
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            const analysisBtns = document.querySelectorAll('.analysis-btn');
+
+            const showModal = () => modal.classList.add('visible');
+            const hideModal = () => modal.classList.remove('visible');
+
+            async function getSectorAnalysis(sectorName) {
+                modalTitle.innerText = `Análisis Estratégico: ${sectorName}`;
+                modalBody.innerHTML = '<div class="flex justify-center"><span class="loader"></span></div>';
+                showModal();
+
+                const prompt = `Actúa como un consultor de estrategia económica de alto nivel. Para el sector '${sectorName}' dentro del marco del 'Plan México', genera un análisis conciso y ejecutivo. El análisis debe incluir los siguientes puntos, formateados claramente con títulos: 1. **Principales Oportunidades:** Enfócate en nearshoring, innovación y cadenas de valor. 2. **Riesgos Clave:** Identifica los principales desafíos internos y externos a mitigar. 3. **Acciones Estratégicas Sugeridas:** Propón 3 acciones concretas y de alto impacto para maximizar el potencial del sector. Usa un lenguaje claro, directo y profesional.`;
+                
+                try {
+                    const apiKey = ""; 
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                    
+                    const payload = {
+                        contents: [{
+                            role: "user",
+                            parts: [{ text: prompt }]
+                        }]
+                    };
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`API request failed with status ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    
+                    if (result.candidates && result.candidates.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        const formattedText = text
+                            .replace(/\*\*(.*?)\*\*/g, '<h3>$1</h3>')
+                            .replace(/\*/g, '<li>')
+                            .replace(/\n/g, '<br>');
+                        modalBody.innerHTML = `<div class="analysis-content">${formattedText.replace(/<br><li>/g, '<li>').replace(/<li>/g, '<ul><li>').replace(/<\/h3>/g, '</h3></ul>')}</div>`;
+                    } else {
+                        throw new Error("No content received from API.");
+                    }
+                } catch (error) {
+                    console.error("Error fetching analysis:", error);
+                    modalBody.innerHTML = `<p class="text-red-500">No se pudo generar el análisis. Por favor, intente de nuevo más tarde.</p>`;
+                }
+            }
+
+            analysisBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const sector = btn.dataset.sector;
+                    getSectorAnalysis(sector);
+                });
+            });
+
+            modalCloseBtn.addEventListener('click', hideModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    hideModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
